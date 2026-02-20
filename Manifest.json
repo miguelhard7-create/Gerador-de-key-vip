@@ -1,0 +1,17 @@
+{
+  "name": "MJ ADMIN V15",
+  "short_name": "MJ Admin",
+  "description": "Painel de Controle Crypto MJ V15",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#bc13fe",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1150/1150175.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MJ ADMIN V15 - FULL CONTROL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #bc13fe; --accent: #00ff9d; --bg: #050505; --red: #ff3e3e; --blue: #00d9ff; }
+        body { margin: 0; font-family: 'Orbitron', sans-serif; background: #000; color: #fff; user-select: none; }
+        
+        /* LOGIN */
+        #loginScreen { position: fixed; inset: 0; background: #000; display: flex; align-items: center; justify-content: center; z-index: 10000; }
+        .login-card { padding: 40px; border: 2px solid var(--primary); text-align: center; box-shadow: 0 0 20px var(--primary); }
+        
+        /* NAV */
+        #mainApp { display: none; flex-direction: column; min-height: 100vh; }
+        .top-nav { background: #111; display: flex; overflow-x: auto; padding: 15px; border-bottom: 2px solid var(--primary); position: sticky; top: 0; z-index: 100; }
+        .nav-item { padding: 12px 20px; cursor: pointer; border: 1px solid var(--primary); margin-right: 10px; font-size: 10px; white-space: nowrap; letter-spacing: 1px; }
+        .nav-item.active { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
+
+        .main-content { padding: 20px; }
+        .section { display: none; width: 100%; }
+        .section.active { display: block !important; }
+
+        /* CARDS */
+        .card { background: rgba(20,20,25,0.9); padding: 25px; border: 1px solid var(--primary); margin-bottom: 20px; }
+        .stat-value { font-size: 28px; color: var(--accent); text-shadow: 0 0 10px var(--accent); }
+
+        input, select { width: 100%; padding: 15px; margin: 10px 0; background: #000; border: 1px solid var(--primary); color: var(--accent); font-family: 'Orbitron'; box-sizing: border-box; font-size: 13px; }
+        button { width: 100%; padding: 15px; background: var(--primary); border: none; color: #fff; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 10px; font-family: 'Orbitron'; transition: 0.2s; }
+        button:active { transform: scale(0.98); }
+        
+        /* KEYS LIST */
+        .key-item { background: #0a0a0a; padding: 18px; border-left: 4px solid var(--accent); margin-bottom: 15px; border-top: 1px solid #222; }
+        .timer-box { font-size: 12px; color: var(--accent); margin: 8px 0; padding: 5px; background: rgba(0,255,157,0.05); display: inline-block; border: 1px solid rgba(0,255,157,0.2); }
+        .ip-info { font-size: 11px; color: var(--blue); margin-bottom: 5px; }
+        
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+        .btn-mini { padding: 10px; font-size: 9px; background: transparent; border: 1px solid var(--primary); color: #fff; cursor: pointer; }
+        .btn-mini.reset { border-color: var(--blue); color: var(--blue); }
+    </style>
+</head>
+<body>
+
+    <div id="loginScreen">
+        <div class="login-card">
+            <h1 style="color:var(--primary); margin:0;">MJ ADMIN</h1>
+            <p style="font-size:10px; color:#666; margin-bottom:20px;">CRYPTO INTERFACE V15</p>
+            <input type="password" id="passInput" placeholder="SENHA DE ACESSO">
+            <button onclick="verificarLogin()">DESBLOQUEAR</button>
+        </div>
+    </div>
+
+    <div id="mainApp">
+        <nav class="top-nav">
+            <div class="nav-item active" onclick="trocarAba('dash', this)">PAINEL</div>
+            <div class="nav-item" onclick="trocarAba('gerar', this)">GERAR</div>
+            <div class="nav-item" onclick="trocarAba('hist', this)">BANCO_KEYS</div>
+            <div class="nav-item" onclick="trocarAba('conf', this)">CONFIG</div>
+            <div class="nav-item" onclick="location.reload()" style="border-color:var(--red)">SAIR</div>
+        </nav>
+
+        <div class="main-content">
+            <div id="dash" class="section active">
+                <div class="card">
+                    <p style="font-size:10px;color:#888;letter-spacing:2px">SALDO_TOTAL</p>
+                    <div id="saldoTxt" class="stat-value">500.000</div>
+                </div>
+                <div class="card">
+                    <p style="font-size:10px;color:#888;letter-spacing:2px">KEYS_ATIVAS</p>
+                    <div id="ativasTxt" class="stat-value" style="color:var(--primary)">0</div>
+                </div>
+            </div>
+
+            <div id="gerar" class="section">
+                <div class="card">
+                    <h2 style="color:var(--accent); font-size:18px;">CRIAR ACESSO</h2>
+                    <input type="text" id="clienteNome" placeholder="NOME DO CLIENTE">
+                    
+                    <label style="font-size:10px; color:#888;">DURAÇÃO DA CHAVE:</label>
+                    <select id="tempoSel">
+                        <option value="10|1">01 DIA - 10c</option>
+                        <option value="20|3">03 DIAS - 20c</option>
+                        <option value="50|7">07 DIAS - 50c</option>
+                        <option value="80|10">10 DIAS - 80c</option>
+                        <option value="120|15">15 DIAS - 120c</option>
+                        <option value="200|30">30 DIAS - 200c</option>
+                        <option value="300|45">45 DIAS - 300c</option>
+                        <option value="7000|99999">LIFETIME - 7000c</option>
+                    </select>
+
+                    <label style="font-size:10px; color:#888;">LIMITE DE DISPOSITIVOS:</label>
+                    <select id="slotsSel">
+                        <option value="1">1 DISPOSITIVO</option>
+                        <option value="2">2 DISPOSITIVOS</option>
+                        <option value="5">5 DISPOSITIVOS</option>
+                        <option value="999">ILIMITADO (∞)</option>
+                    </select>
+
+                    <button onclick="gerarAgora()">GERAR KEY AGORA</button>
+                </div>
+            </div>
+
+            <div id="hist" class="section">
+                <h2 style="font-size:14px;letter-spacing:2px">GERENCIAR_KEYS</h2>
+                <div id="listaChaves"></div>
+            </div>
+
+            <div id="conf" class="section">
+                <div class="card">
+                    <h2>CORES_SISTEMA</h2>
+                    <button onclick="mudarCor('#bc13fe')" style="background:#bc13fe">ROXO</button>
+                    <button onclick="mudarCor('#00ff9d')" style="background:#00ff9d;color:#000">VERDE</button>
+                    <button onclick="mudarCor('#00d9ff')" style="background:#00d9ff;color:#000">AZUL</button>
+                    <button onclick="mudarCor('#ffae00')" style="background:#ffae00;color:#000">OURO</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let saldo = 500000;
+        let db = JSON.parse(localStorage.getItem('mj_db_v15')) || [];
+
+        function verificarLogin() {
+            if(document.getElementById('passInput').value === "1255") {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'flex';
+                atualizarInterface();
+                setInterval(renderizarKeys, 1000); 
+            } else { alert("ACESSO NEGADO"); }
+        }
+
+        function trocarAba(id, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function atualizarInterface() {
+            document.getElementById('saldoTxt').innerText = saldo.toLocaleString('pt-BR');
+            document.getElementById('ativasTxt').innerText = db.filter(k => k.status === 'Ativa').length;
+            renderizarKeys();
+            localStorage.setItem('mj_db_v15', JSON.stringify(db));
+        }
+
+        function renderizarKeys() {
+            const lista = document.getElementById('listaChaves');
+            if(!lista) return;
+            
+            let html = '';
+            db.forEach((item, i) => {
+                const tempoRestante = calcularTempo(item);
+                const statusColor = item.status === 'Ativa' ? 'var(--accent)' : 'var(--red)';
+                const limitTxt = item.limite == 999 ? '∞' : item.limite;
+                
+                html += `
+                    <div class="key-item" style="border-left-color: ${item.status === 'Ativa' ? 'var(--accent)' : '#ffae00'}">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="color:var(--primary); font-weight:bold;">${item.key}</span>
+                            <span style="font-size:9px; color:${statusColor}">● ${item.status}</span>
+                        </div>
+                        <div style="font-size:10px; color:#888; margin: 5px 0;">CLIENTE: ${item.nome}</div>
+                        
+                        <div class="ip-info">IP: ${item.ips_conectados || 0} / ${limitTxt}</div>
+                        
+                        <div class="timer-box">
+                            TIME: ${item.infinito ? 'ILIMITADO' : tempoRestante}
+                        </div>
+
+                        <div class="btn-grid">
+                            <button class="btn-mini" onclick="copiar('${item.key}')">COPIAR</button>
+                            <button class="btn-mini" onclick="alternarPausa(${i})">${item.status === 'Ativa' ? 'PAUSAR' : 'PLAY'}</button>
+                            <button class="btn-mini reset" onclick="resetIP(${i})">RESET IP</button>
+                            <button class="btn-mini" style="border-color:var(--red)" onclick="banir(${i})">BANIR</button>
+                        </div>
+                    </div>`;
+            });
+            lista.innerHTML = html || '<p style="color:#444; font-size:10px;">BANCO DE DADOS VAZIO</p>';
+        }
+
+        function calcularTempo(item) {
+            if (item.infinito) return "∞";
+            if (item.status === 'Pausada') return "FREEZE";
+
+            const rest = item.validade - Date.now();
+            if (rest <= 0) { item.status = 'Expirada'; return "00:00:00"; }
+
+            const dias = Math.floor(rest / (1000 * 60 * 60 * 24));
+            const horas = Math.floor((rest % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const mins = Math.floor((rest % (1000 * 60 * 60)) / (1000 * 60));
+            const secs = Math.floor((rest % (1000 * 60)) / 1000);
+
+            return `${dias}d ${horas}h ${mins}m ${secs}s`;
+        }
+
+        function gerarAgora() {
+            const nome = document.getElementById('clienteNome').value || "CLIENTE_X";
+            const [custo, dias] = document.getElementById('tempoSel').value.split('|');
+            const limite = document.getElementById('slotsSel').value;
+            const valor = parseInt(custo);
+
+            if(saldo >= valor) {
+                saldo -= valor;
+                db.unshift({
+                    key: "MJ-" + Math.floor(1000 + Math.random() * 9000),
+                    nome: nome,
+                    validade: Date.now() + (parseInt(dias) * 24 * 60 * 60 * 1000),
+                    status: 'Ativa',
+                    infinito: dias > 10000,
+                    investido: valor,
+                    limite: parseInt(limite),
+                    ips_conectados: 0
+                });
+                atualizarInterface();
+                trocarAba('hist', document.querySelectorAll('.nav-item')[2]);
+            } else { alert("SALDO INSUFICIENTE"); }
+        }
+
+        function resetIP(i) {
+            db[i].ips_conectados = 0;
+            atualizarInterface();
+            alert("DISPOSITIVOS RESETADOS!");
+        }
+
+        function alternarPausa(i) {
+            if(db[i].status === 'Ativa') {
+                db[i].tempoRestantePausa = db[i].validade - Date.now();
+                db[i].status = 'Pausada';
+            } else {
+                db[i].validade = Date.now() + db[i].tempoRestantePausa;
+                db[i].status = 'Ativa';
+            }
+            atualizarInterface();
+        }
+
+        function banir(i) {
+            if(confirm("DEVOLVER SALDO E BANIR?")) {
+                saldo += db[i].investido;
+                db.splice(i, 1);
+                atualizarInterface();
+            }
+        }
+
+        function copiar(t) { navigator.clipboard.writeText(t); alert("KEY COPIADA!"); }
+        function mudarCor(c) { document.documentElement.style.setProperty('--primary', c); }
+    </script>
+</body>
+</html>
